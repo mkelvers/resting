@@ -3,6 +3,8 @@
 namespace App;
 
 use Comet\Comet;
+use Comet\Request;
+use Comet\Response;
 
 class Routes
 {
@@ -26,5 +28,13 @@ class Routes
     foreach ($files as $file) {
       require_once $file;
     }
+
+    // catch-all route for any undefined routes, returns a 404 error
+    // this should be registered last to ensure it doesn't override any defined routes
+    $app->any('/{path:.+}', function (Request $request, Response $response, $args) {
+      return $response
+        ->with(['error' => 'route not found'])
+        ->withStatus(404);
+    });
   }
 }
