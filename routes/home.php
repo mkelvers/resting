@@ -1,14 +1,12 @@
 <?php
 
-use App\Database;
 use Comet\Request;
 use Comet\Response;
 
 $app->get('/', function (Request $request, Response $response) {
+  return $response->with(['message' => 'hello world'], 200);
+});
 
-  $posts = Database::instance()
-    ->query('SELECT * FROM posts')
-    ->fetchAll();
-
-  return $response->with($posts);
+$app->get('/favicon.ico', function ($request, $response) {
+  return $response->withStatus(204);
 });
