@@ -2,7 +2,8 @@ FROM php:8.2-cli-alpine
 
 WORKDIR /app
 
-# Install composer
+# Install PHP extensions and composer
+RUN docker-php-ext-install pdo pdo_mysql
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copy composer files first for better caching
