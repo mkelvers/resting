@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8080
 
 # Run the application
-CMD ["php", "index.php"]
+CMD ["php", "index.php", "start"]
