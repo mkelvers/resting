@@ -5,7 +5,8 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/"
-        }
+        },
+        "files": ["src/Helpers.php"]
     },
     "require": {
         "gotzmann/comet": "^2.7",
