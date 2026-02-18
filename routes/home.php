@@ -1,9 +1,14 @@
 <?php
 
+use App\Database;
 use Comet\Request;
 use Comet\Response;
 
 $app->get('/', function (Request $request, Response $response) {
-  $data = ['message' => 'rest api is working!'];
-  return $response->with($data);
+
+  $posts = Database::instance()
+    ->query('SELECT * FROM posts')
+    ->fetchAll();
+
+  return $response->with($posts);
 });
