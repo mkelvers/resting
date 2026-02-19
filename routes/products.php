@@ -16,16 +16,23 @@ $app->get('/products', function (Request $request, Response $response) {
 
 // get single product with related data
 $app->get('/products/{id}', function (Request $request, Response $response, $args = []) {
-    $id = $args['id'];
+    $id = filter_var($args['id'], FILTER_VALIDATE_INT);
 
-    // fetch product + country name
-    $product = Database::instance()
+    if ($id === false || $id <= 0) {
+        return $response->with(['message' => 'invalid product id'], 400);
+    }
+
+    $db = Database::instance();
+    $params = ['id' => $id];
+
+    $product = $db
         ->query(
-            'SELECT p.*, c.name as country 
-             FROM products p 
-             LEFT JOIN country c ON p.country_id = c.id 
+            'SELECT p.id, p.title, p.description, p.price, p.media_condition,
+             p.sleeve_condition, p.stock, p.format, p.release_date, c.name as country
+             FROM products p
+             JOIN country c ON p.country_id = c.id
              WHERE p.id = :id',
-            ['id' => $id]
+            $params
         )
         ->fetch();
 
@@ -33,65 +40,54 @@ $app->get('/products/{id}', function (Request $request, Response $response, $arg
         return $response->with(['message' => 'product not found'], 404);
     }
 
-    unset($product['country_id']);
+    $product['images'] = $db
+        ->query('SELECT id, url, alt_text FROM images WHERE product_id = :id', $params)
+        ->fetchAll();
 
-    // labels
-    $product['labels'] = Database::instance()
+    $product['artists'] = $db
         ->query(
-            'SELECT l.name FROM product_labels pl 
-             JOIN label l ON pl.label_id = l.id 
-             WHERE pl.product_id = :id',
-            ['id' => $id]
-        )
-        ->fetchAll(\PDO::FETCH_COLUMN);
-
-    // images
-    $product['images'] = Database::instance()
-        ->query(
-            'SELECT url, alt_text FROM images WHERE product_id = :id ORDER BY position',
-            ['id' => $id]
+            'SELECT a.id, a.name FROM artist a
+            JOIN product_artists pa ON a.id = pa.artist_id
+            WHERE pa.product_id = :id',
+            $params
         )
         ->fetchAll();
 
-    // artists
-    $product['artists'] = Database::instance()
+    $product['labels'] = $db
         ->query(
-            'SELECT a.name FROM product_artists pa 
-             JOIN artist a ON pa.artist_id = a.id 
-             WHERE pa.product_id = :id',
-            ['id' => $id]
+            'SELECT l.id, l.name FROM label l
+            JOIN product_labels pl ON l.id = pl.label_id
+            WHERE pl.product_id = :id',
+            $params
         )
-        ->fetchAll(\PDO::FETCH_COLUMN);
+        ->fetchAll();
 
-    // genres
-    $product['genres'] = Database::instance()
+    $product['genres'] = $db
         ->query(
-            'SELECT g.name FROM product_genres pg 
-             JOIN genre g ON pg.genre_id = g.id 
-             WHERE pg.product_id = :id',
-            ['id' => $id]
+            'SELECT g.id, g.name FROM genre g
+            JOIN product_genres pg ON g.id = pg.genre_id
+            WHERE pg.product_id = :id',
+            $params
         )
-        ->fetchAll(\PDO::FETCH_COLUMN);
+        ->fetchAll();
 
-    // tracks
-    $product['tracks'] = Database::instance()
+    $product['tracks'] = $db
         ->query(
             'SELECT title, duration, position, side 
              FROM tracks 
              WHERE product_id = :id 
              ORDER BY side, position',
-            ['id' => $id]
+            $params
         )
         ->fetchAll();
 
-    // credits
-    $product['credits'] = Database::instance()
+    $product['credits'] = $db
         ->query(
             'SELECT a.name, pc.role 
              FROM product_credits pc 
              JOIN artist a ON pc.artist_id = a.id 
              WHERE pc.product_id = :id',
-            ['id' => $id]
+            $params
         )
         ->fetchAll();
 
