@@ -3,6 +3,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use Dotenv\Dotenv;
 use App\Routes;
+use function App\strip_trailing_slash;
 
 // Only load .env file if environment variables are not already set (e.g., in production)
 if (!isset($_ENV['DB_HOST'])) {
@@ -14,6 +15,8 @@ $app = new Comet\Comet([
     'host' => '0.0.0.0',
     'port' => $_ENV['PORT'] ?? 8080,
 ]);
+
+$app->add(strip_trailing_slash());
 
 Routes::register($app);
 

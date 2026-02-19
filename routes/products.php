@@ -5,7 +5,6 @@ use function App\rest;
 use Comet\Request;
 use Comet\Response;
 
-// list all products (returns id + url for each)
 $app->get('/products', function (Request $request, Response $response) {
     $products = Database::instance()
         ->query('SELECT * FROM products')
@@ -14,7 +13,6 @@ $app->get('/products', function (Request $request, Response $response) {
     return $response->with(rest($products, 'products'));
 });
 
-// get single product with related data
 $app->get('/products/{id}', function (Request $request, Response $response, $args = []) {
     $id = filter_var($args['id'], FILTER_VALIDATE_INT);
 

@@ -3,6 +3,25 @@
 namespace App;
 
 /**
+ * Middleware to strip trailing slashes from request URIs.
+ * This helps to avoid issues with routing and ensures consistent URL handling.
+ *
+ * @return callable The middleware function that processes the request and response.
+ */
+function strip_trailing_slash(): callable
+{
+    return function ($request, $handler) {
+        $uri = $request->getUri()->getPath();
+        if ($uri !== '/' && str_ends_with($uri, '/')) {
+            return $handler->handle($request->withUri(
+                $request->getUri()->withPath(rtrim($uri, '/'))
+            ));
+        }
+        return $handler->handle($request);
+    };
+}
+
+/**
  * Transforms an array of items into a RESTful response format.
  * Each item is expected to have an 'id' field, which is used to generate a URL for the resource.
  * 
