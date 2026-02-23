@@ -30,7 +30,11 @@ class Database
 
     $config = [];
     foreach (['host', 'port', 'name', 'user', 'password'] as $key) {
-      $config[$key] = $_ENV['DB_'.strtoupper($key)] ?? '';
+      $envKey = 'DB_'.strtoupper($key);
+      if (!isset($_ENV[$envKey])) {
+        throw new \Exception("missing db environment variable: {$envKey}");
+      }
+      $config[$key] = $_ENV[$envKey];
     }
 
     self::$pdo = new PDO(

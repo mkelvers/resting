@@ -5,7 +5,7 @@ use Dotenv\Dotenv;
 use App\Routes;
 use function App\strip_trailing_slash;
 
-// Only load .env file if environment variables are not already set (e.g., in production)
+// only load .env file if environment variables are not already set (e.g., in production)
 if (!isset($_ENV['DB_HOST'])) {
   $dotenv = Dotenv::createImmutable(__DIR__);
   $dotenv->safeLoad();
