@@ -51,4 +51,19 @@ class Database
 
     return self::$pdo;
   }
+
+  /**
+   * Fetch related records from a table based on a foreign key.
+   * 
+   * @param string $table The name of the related table.
+   * @param string $foreignKey The name of the foreign key column in the related table.
+   * @param mixed $id The value of the foreign key to match.
+   * @param string $columns The columns to select (default is '*').
+   * 
+   * @return array An array of related records.
+   */
+  public function related(string $table, string $foreignKey, mixed $id, string $columns = '*'): array
+  {
+    return $this->query("SELECT $columns FROM $table WHERE $foreignKey = :id", ['id' => $id])->fetchAll();
+  }
 }
