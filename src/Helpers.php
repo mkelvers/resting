@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Comet\Request;
+
 /**
  * Middleware to strip trailing slashes from request URIs.
  * This helps to avoid issues with routing and ensures consistent URL handling.
@@ -29,7 +31,7 @@ function strip_trailing_slash(): callable
  * @param string $route The base route for the resources (e.g., 'posts').
  * @return array The transformed RESTful response.
  */
-function rest(array $data, string $route): array
+function rest(array $data, string $route, ?int $count = null, ?int $limit = null, ?int $offset = null): array
 {
     // base url from environment, used to build resource urls
     $url = $_ENV['BASE_URL'];
@@ -43,10 +45,46 @@ function rest(array $data, string $route): array
         ];
     }, $data);
 
+    $next = null;
+    $previous = null;
+
+    if ($count !== null && $limit !== null && $offset !== null) {
+        if ($offset + $limit < $count) {
+            $nextOffset = $offset + $limit;
+            $next = "$url/$route?offset=$nextOffset&limit=$limit";
+        }
+        
+        if ($offset > 0) {
+            $prevOffset = max(0, $offset - $limit);
+            $previous = "$url/$route?offset=$prevOffset&limit=$limit";
+        }
+    }
+
     return [
-        'count' => count($data),
-        'next' => null,
-        'previous' => null,
+        'count' => $count ?? count($data),
+        'next' => $next,
+        'previous' => $previous,
         'results' => $results,
+    ];
+}
+
+/**
+ * Extract pagination details from a request.
+ *
+ * @param \Comet\Request $request
+ * @return array{limit: int, offset: int}
+ */
+function paginate(Request $request): array
+{
+    $params = $request->getQueryParams() ?? [];
+    
+    // set default limit and offset values, however can be overriden by query parameters
+    // we also ensure that limit is at least 1 and offset is not negative
+    $limit = isset($params['limit']) ? max(1, (int)$params['limit']) : 20;
+    $offset = isset($params['offset']) ? max(0, (int)$params['offset']) : 0;
+
+    return [
+        'limit' => $limit,
+        'offset' => $offset,
     ];
 }

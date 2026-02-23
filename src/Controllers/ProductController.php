@@ -6,6 +6,7 @@ use App\Database;
 use Comet\Request;
 use Comet\Response;
 use function App\rest;
+use function App\paginate;
 
 class ProductController
 {
@@ -18,12 +19,17 @@ class ProductController
      */
     public function index(Request $request, Response $response)
     {
-        // Fetch all basic product records from the database
-        $products = Database::instance()
-            ->query('SELECT * FROM products')
+        ['limit' => $limit, 'offset' => $offset] = paginate($request);
+
+        $db = Database::instance();
+
+        $total = (int)$db->query('SELECT COUNT(*) as count FROM products')->fetch()['count'];
+
+        $products = $db
+            ->query("SELECT * FROM products LIMIT $limit OFFSET $offset")
             ->fetchAll();
 
-        return $response->with(rest($products, 'products'));
+        return $response->with(rest($products, 'products', $total, $limit, $offset));
     }
 
     /**
