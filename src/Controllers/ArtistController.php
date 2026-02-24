@@ -96,6 +96,31 @@ class ArtistController
         return $response->with(['message' => 'artist created', 'id' => (int)$id], 201);
     }
 
+    public function patch(Request $request, Response $response, array $args = [])
+    {
+        $id = filter_var($args['id'], FILTER_VALIDATE_INT);
+        if ($id === false || $id <= 0) {
+            return $response->with(['message' => 'invalid artist id'], 400);
+        }
+
+        $body = $request->getParsedBody();
+
+        if (!isset($body['name']) || empty($body['name'])) {
+            return $response->with(['message' => 'name is required'], 400);
+        }
+
+        $db = Database::instance();
+
+        $artist = $db->query('SELECT id FROM artist WHERE id = ?', [$id])->fetch();
+        if (!$artist) {
+            return $response->with(['message' => 'artist not found'], 404);
+        }
+
+        $db->query('UPDATE artist SET name = ? WHERE id = ?', [$body['name'], $id]);
+
+        return $response->with(['message' => 'artist updated'], 200);
+    }
+
     public function destroy(Request $request, Response $response, array $args = [])
     {
         $id = filter_var($args['id'], FILTER_VALIDATE_INT);
