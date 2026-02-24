@@ -234,4 +234,31 @@ class ProductController
 
         return $response->with(['message' => 'product updated'], 200);
     }
+
+    /**
+     * Delete a product.
+     * 
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return Response
+     */
+    public function destroy(Request $request, Response $response, array $args = [])
+    {
+        $id = filter_var($args['id'], FILTER_VALIDATE_INT);
+        if ($id === false || $id <= 0) {
+            return $response->with(['message' => 'invalid product id'], 400);
+        }
+
+        $db = Database::instance();
+
+        $product = $db->query('SELECT id FROM products WHERE id = :id', ['id' => $id])->fetch();
+        if (!$product) {
+            return $response->with(['message' => 'product not found'], 404);
+        }
+
+        $db->query('DELETE FROM products WHERE id = :id', ['id' => $id]);
+
+        return $response->with(['message' => 'product deleted'], 200);
+    }
 }

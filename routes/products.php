@@ -9,3 +9,4 @@ $app->get('/products/{id}', [$controller, 'show']);
 $app->post('/products', [$controller, 'store']);
 $app->put('/products/{id}', [$controller, 'update']);
 $app->patch('/products/{id}', [$controller, 'patch']);
+$app->delete('/products/{id}', [$controller, 'destroy']);
