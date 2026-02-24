@@ -4,6 +4,24 @@ namespace App;
 
 use Comet\Request;
 
+const MEDIA_CONDITIONS = ['mint', 'near_mint', 'very_good_plus', 'very_good', 'good', 'fair', 'poor'];
+const SLEEVE_CONDITIONS = ['mint', 'near_mint', 'very_good_plus', 'very_good', 'good', 'fair', 'poor', 'generic'];
+const FORMATS = ['lp', 'vinyl', '12_maxi', '7_single', 'cd_album', 'cd_single'];
+
+function validate_enum_fields(array $body): ?string
+{
+    if (isset($body['media_condition']) && !in_array($body['media_condition'], MEDIA_CONDITIONS, true)) {
+        return 'invalid media_condition';
+    }
+    if (isset($body['sleeve_condition']) && !in_array($body['sleeve_condition'], SLEEVE_CONDITIONS, true)) {
+        return 'invalid sleeve_condition';
+    }
+    if (isset($body['format']) && !in_array($body['format'], FORMATS, true)) {
+        return 'invalid format';
+    }
+    return null;
+}
+
 /**
  * Middleware to strip trailing slashes from request URIs.
  * This helps to avoid issues with routing and ensures consistent URL handling.

@@ -7,6 +7,7 @@ use Comet\Request;
 use Comet\Response;
 use function App\rest;
 use function App\paginate;
+use function App\validate_enum_fields;
 
 class ProductController
 {
@@ -95,6 +96,10 @@ class ProductController
             return $response->with(['message' => 'title and price are required'], 400);
         }
 
+        if ($error = validate_enum_fields($body)) {
+            return $response->with(['message' => $error], 400);
+        }
+
         $db = Database::instance();
         $sql = 'INSERT INTO products (title, description, price, media_condition, sleeve_condition, stock, format, release_date, country_id) 
                 VALUES (:title, :description, :price, :media_condition, :sleeve_condition, :stock, :format, :release_date, :country_id)';
@@ -138,6 +143,10 @@ class ProductController
 
         if (!isset($body['title']) || !isset($body['price'])) {
             return $response->with(['message' => 'title and price are required for replacement'], 400);
+        }
+
+        if ($error = validate_enum_fields($body)) {
+            return $response->with(['message' => $error], 400);
         }
 
         $db = Database::instance();
@@ -198,6 +207,10 @@ class ProductController
         $body = $request->getParsedBody();
         if (empty($body)) {
             return $response->with(['message' => 'no data provided'], 400);
+        }
+
+        if ($error = validate_enum_fields($body)) {
+            return $response->with(['message' => $error], 400);
         }
 
         $db = Database::instance();
