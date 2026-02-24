@@ -27,7 +27,7 @@ class ProductController
         $total = (int)$db->query('SELECT COUNT(*) as count FROM products')->fetch()['count'];
 
         $products = $db
-            ->query("SELECT id FROM products LIMIT $limit OFFSET $offset")
+            ->query("SELECT id FROM products LIMIT ? OFFSET ?", [$limit, $offset])
             ->fetchAll();
 
         return $response->with(rest($products, 'products', $total, $limit, $offset));

@@ -47,20 +47,27 @@ function strip_trailing_slash(): callable
  * 
  * @param array $data The array of items to transform.
  * @param string $route The base route for the resources (e.g., 'posts').
+ * @param array $extraFields Fields to include alongside id and url (e.g., ['name', 'title']).
  * @return array The transformed RESTful response.
  */
-function rest(array $data, string $route, ?int $count = null, ?int $limit = null, ?int $offset = null): array
+function rest(array $data, string $route, ?int $count = null, ?int $limit = null, ?int $offset = null, array $extraFields = []): array
 {
     // base url from environment, used to build resource urls
     $url = $_ENV['BASE_URL'];
 
     // transforms each item into its id and url representation
-    $results = array_map(function (array $item) use ($url, $route): array {
+    $results = array_map(function (array $item) use ($url, $route, $extraFields): array {
         $id = $item['id'] ?? null;
-        return [
+        $result = [
             'id' => $id,
             'url' => $id ? "$url/$route/$id" : null,
         ];
+        foreach ($extraFields as $field) {
+            if (array_key_exists($field, $item)) {
+                $result[$field] = $item[$field];
+            }
+        }
+        return $result;
     }, $data);
 
     $next = null;
