@@ -26,7 +26,7 @@ class ProductController
         $total = (int)$db->query('SELECT COUNT(*) as count FROM products')->fetch()['count'];
 
         $products = $db
-            ->query("SELECT * FROM products LIMIT $limit OFFSET $offset")
+            ->query("SELECT id FROM products LIMIT $limit OFFSET $offset")
             ->fetchAll();
 
         return $response->with(rest($products, 'products', $total, $limit, $offset));
@@ -58,7 +58,7 @@ class ProductController
             ->query(
                 'SELECT p.id, p.title, p.description, p.price, p.media_condition,
                  p.sleeve_condition, p.stock, p.format, p.release_date, c.name as country
-                 FROM products p JOIN country c ON p.country_id = c.id WHERE p.id = :id',
+                 FROM products p LEFT JOIN country c ON p.country_id = c.id WHERE p.id = :id',
                 ['id' => $id]
             )
             ->fetch();
