@@ -23,6 +23,7 @@ services:
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306
+      PMA_DEFAULT_STYLE: boodark
     depends_on:
       mysql:
         condition: service_healthy
