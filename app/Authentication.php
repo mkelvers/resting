@@ -7,7 +7,6 @@ namespace App;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Comet\Request;
 use Comet\Response;
-use Psr\Http\Message\ResponseInterface;
 
 class Authentication
 {
