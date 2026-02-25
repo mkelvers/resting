@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use Comet\Request;
@@ -111,5 +113,23 @@ function paginate(Request $request): array
     return [
         'limit' => $limit,
         'offset' => $offset,
+    ];
+}
+
+function response(mixed $data, int $status = 200): array
+{
+    return [
+        'data' => $data,
+        'status' => $status,
+    ];
+}
+
+function error_response(string $message, int $status = 400): array
+{
+    return [
+        'error' => [
+            'message' => $message,
+        ],
+        'status' => $status,
     ];
 }

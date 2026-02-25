@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Database;
@@ -8,48 +10,48 @@ use Comet\Response;
 
 use function App\paginate;
 use function App\rest;
+use function App\response;
+use function App\error_response;
 
 class ArtistController
 {
-    private $baseUrl;
+    private string $baseUrl;
+    private Database $db;
 
-    public function __construct()
+    public function __construct(Database $db, string $baseUrl)
     {
-        $this->baseUrl = $_ENV['BASE_URL'];
+        $this->db = $db;
+        $this->baseUrl = $baseUrl;
     }
 
-    public function index(Request $request, Response $response)
+    public function index(Request $request, Response $response): Response
     {
         ['limit' => $limit, 'offset' => $offset] = paginate($request);
 
-        $db = Database::instance();
-         
-        $total = (int)$db->query('SELECT COUNT(*) as count FROM artist')->fetch()['count'];
+        $total = (int)$this->db->query('SELECT COUNT(*) as count FROM artist')->fetch()['count'];
 
-        $artists = $db
-            ->query('SELECT id, name FROM artist LIMIT ? OFFSET ?', [$limit, $offset])
+        $artists = $this->db
+            ->query('SELECT id, name FROM artist LIMIT :limit OFFSET :offset', ['limit' => $limit, 'offset' => $offset])
             ->fetchAll();
 
         return $response->with(rest($artists, 'artists', $total, $limit, $offset, ['name']));
     }
 
-    public function show(Request $request, Response $response, array $args = [])
+    public function show(Request $request, Response $response, array $args = []): Response
     {
         $id = filter_var($args['id'], FILTER_VALIDATE_INT);
         if ($id === false || $id <= 0) {
-            return $response->with(['message' => 'invalid artist id'], 400);
+            return $response->with(error_response('invalid artist id', 400), 400);
         }
 
-        $db = Database::instance();
-
-        $artist = $db->query('SELECT id, name FROM artist WHERE id = ?', [$id])->fetch();
+        $artist = $this->db->query('SELECT id, name FROM artist WHERE id = :id', ['id' => $id])->fetch();
         if (!$artist) {
-            return $response->with(['message' => 'artist not found'], 404);
+            return $response->with(error_response('artist not found', 404), 404);
         }
 
-        $products = $db->query(
-            'SELECT p.id, p.title FROM products p JOIN product_artists pa ON p.id = pa.product_id WHERE pa.artist_id = ?',
-            [$id]
+        $products = $this->db->query(
+            'SELECT p.id, p.title FROM products p JOIN product_artists pa ON p.id = pa.product_id WHERE pa.artist_id = :id',
+            ['id' => $id]
         )->fetchAll();
 
         $artist['products'] = array_map(fn($product) => [
@@ -58,9 +60,9 @@ class ArtistController
             'url' => $this->baseUrl . '/products/' . $product['id'],
         ], $products);
 
-        $credits = $db->query(
-            'SELECT pc.role, pc.product_id, p.title FROM product_credits pc JOIN products p ON pc.product_id = p.id WHERE pc.artist_id = ?',
-            [$id]
+        $credits = $this->db->query(
+            'SELECT pc.role, pc.product_id, p.title FROM product_credits pc JOIN products p ON pc.product_id = p.id WHERE pc.artist_id = :id',
+            ['id' => $id]
         )->fetchAll();
 
         $groupedCredits = [];
@@ -78,65 +80,60 @@ class ArtistController
         }
         $artist['credits'] = array_values($groupedCredits);
 
-        return $response->with($artist);
+        return $response->with(response($artist));
     }
 
-    public function store(Request $request, Response $response)
+    public function store(Request $request, Response $response): Response
     {
         $body = $request->getParsedBody();
 
         if (!isset($body['name']) || empty($body['name'])) {
-            return $response->with(['message' => 'name is required'], 400);
+            return $response->with(error_response('name is required', 400), 400);
         }
 
-        $db = Database::instance();
-        $db->query('INSERT INTO artist (name) VALUES (?)', [$body['name']]);
-        $id = \App\Database::pdo()->lastInsertId();
+        $this->db->query('INSERT INTO artist (name) VALUES (:name)', ['name' => $body['name']]);
+        $id = (int)$this->db->lastInsertId();
 
-        return $response->with(['message' => 'artist created', 'id' => (int)$id], 201);
+        return $response->with(response(['message' => 'artist created', 'id' => $id], 201), 201);
     }
 
-    public function patch(Request $request, Response $response, array $args = [])
+    public function patch(Request $request, Response $response, array $args = []): Response
     {
         $id = filter_var($args['id'], FILTER_VALIDATE_INT);
         if ($id === false || $id <= 0) {
-            return $response->with(['message' => 'invalid artist id'], 400);
+            return $response->with(error_response('invalid artist id'), 400);
         }
 
         $body = $request->getParsedBody();
 
         if (!isset($body['name']) || empty($body['name'])) {
-            return $response->with(['message' => 'name is required'], 400);
+            return $response->with(error_response('name is required'), 400);
         }
 
-        $db = Database::instance();
-
-        $artist = $db->query('SELECT id FROM artist WHERE id = ?', [$id])->fetch();
+        $artist = $this->db->query('SELECT id FROM artist WHERE id = :id', ['id' => $id])->fetch();
         if (!$artist) {
-            return $response->with(['message' => 'artist not found'], 404);
+            return $response->with(error_response('artist not found'), 404);
         }
 
-        $db->query('UPDATE artist SET name = ? WHERE id = ?', [$body['name'], $id]);
+        $this->db->query('UPDATE artist SET name = :name WHERE id = :id', ['name' => $body['name'], 'id' => $id]);
 
-        return $response->with(['message' => 'artist updated'], 200);
+        return $response->with(response(['message' => 'artist updated']));
     }
 
-    public function destroy(Request $request, Response $response, array $args = [])
+    public function destroy(Request $request, Response $response, array $args = []): Response
     {
         $id = filter_var($args['id'], FILTER_VALIDATE_INT);
         if ($id === false || $id <= 0) {
-            return $response->with(['message' => 'invalid artist id'], 400);
+            return $response->with(error_response('invalid artist id'), 400);
         }
 
-        $db = Database::instance();
-
-        $artist = $db->query('SELECT id FROM artist WHERE id = ?', [$id])->fetch();
+        $artist = $this->db->query('SELECT id FROM artist WHERE id = :id', ['id' => $id])->fetch();
         if (!$artist) {
-            return $response->with(['message' => 'artist not found'], 404);
+            return $response->with(error_response('artist not found'), 404);
         }
 
-        $db->query('DELETE FROM artist WHERE id = ?', [$id]);
+        $this->db->query('DELETE FROM artist WHERE id = :id', ['id' => $id]);
 
-        return $response->with(['message' => 'artist deleted'], 200);
+        return $response->with(response(['message' => 'artist deleted']));
     }
 }

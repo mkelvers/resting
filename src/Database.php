@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use PDO;
@@ -20,6 +22,11 @@ class Database
     $stmt = self::pdo()->prepare($sql);
     $stmt->execute($params);
     return $stmt;
+  }
+
+  public function lastInsertId(): string
+  {
+    return (string)self::pdo()->lastInsertId();
   }
 
   public static function pdo(): PDO

@@ -1,8 +1,11 @@
 <?php
 
-use App\Controllers\ProductController;
+declare(strict_types=1);
 
-$controller = new ProductController();
+use App\Controllers\ProductController;
+use App\Database;
+
+$controller = new ProductController(Database::instance());
 
 $app->get('/products', [$controller, 'index']);
 $app->get('/products/{id}', [$controller, 'show']);

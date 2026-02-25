@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Comet\Request;
 use Comet\Response;
 
