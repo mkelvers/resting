@@ -48,35 +48,35 @@ class ArtistController
             return $response->with(error_response('artist not found'), 404);
         }
 
-        $albums = $this->db->query(
+        $records = $this->db->query(
             'SELECT p.id, p.title FROM records p JOIN record_artists ra ON p.id = ra.record_id WHERE ra.artist_id = :id',
             ['id' => $id]
         )->fetchAll();
 
-        $artist['albums'] = array_map(fn($album) => [
-            'id' => $album['id'],
-            'title' => $album['title'],
-            'url' => $this->baseUrl . '/records/' . $album['id'],
-        ], $albums);
+        $artist['records'] = array_map(fn($record) => [
+            'id' => $record['id'],
+            'title' => $record['title'],
+            'url' => $this->baseUrl . '/records/' . $record['id'],
+        ], $records);
 
         $credits = $this->db->query(
             'SELECT rc.role, rc.record_id, p.title FROM record_credits rc JOIN records p ON rc.record_id = p.id WHERE rc.artist_id = :id',
             ['id' => $id]
         )->fetchAll();
 
-        // group credits by album since an artist can have multiple roles on one album
+        // group credits by record since an artist can have multiple roles on one record
         $groupedCredits = [];
         foreach ($credits as $credit) {
-            $albumId = $credit['record_id'];
-            if (!isset($groupedCredits[$albumId])) {
-                $groupedCredits[$albumId] = [
-                    'record_id' => $albumId,
+            $recordId = $credit['record_id'];
+            if (!isset($groupedCredits[$recordId])) {
+                $groupedCredits[$recordId] = [
+                    'record_id' => $recordId,
                     'title' => $credit['title'],
-                    'url' => $this->baseUrl . '/records/' . $albumId,
+                    'url' => $this->baseUrl . '/records/' . $recordId,
                     'roles' => [],
                 ];
             }
-            $groupedCredits[$albumId]['roles'][] = $credit['role'];
+            $groupedCredits[$recordId]['roles'][] = $credit['role'];
         }
         $artist['credits'] = array_values($groupedCredits);
 
