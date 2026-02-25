@@ -27,10 +27,10 @@ class ArtistController
     {
         ['limit' => $limit, 'offset' => $offset] = paginate($request);
 
-        $total = (int)$this->db->query('SELECT COUNT(*) as count FROM artist')->fetch()['count'];
+        $total = (int)$this->db->query('SELECT COUNT(*) as count FROM artists')->fetch()['count'];
 
         $artists = $this->db
-            ->query('SELECT id, name FROM artist LIMIT :limit OFFSET :offset', ['limit' => $limit, 'offset' => $offset])
+            ->query('SELECT id, name FROM artists LIMIT :limit OFFSET :offset', ['limit' => $limit, 'offset' => $offset])
             ->fetchAll();
 
         return $response->with(rest($artists, 'artists', $total, $limit, $offset, ['name']));
@@ -43,40 +43,40 @@ class ArtistController
             return $response->with(error_response('invalid artist id'), 400);
         }
 
-        $artist = $this->db->query('SELECT id, name FROM artist WHERE id = :id', ['id' => $id])->fetch();
+        $artist = $this->db->query('SELECT id, name FROM artists WHERE id = :id', ['id' => $id])->fetch();
         if (!$artist) {
             return $response->with(error_response('artist not found'), 404);
         }
 
-        $products = $this->db->query(
-            'SELECT p.id, p.title FROM products p JOIN product_artists pa ON p.id = pa.product_id WHERE pa.artist_id = :id',
+        $albums = $this->db->query(
+            'SELECT p.id, p.title FROM records p JOIN record_artists ra ON p.id = ra.record_id WHERE ra.artist_id = :id',
             ['id' => $id]
         )->fetchAll();
 
-        $artist['products'] = array_map(fn($product) => [
-            'id' => $product['id'],
-            'title' => $product['title'],
-            'url' => $this->baseUrl . '/products/' . $product['id'],
-        ], $products);
+        $artist['albums'] = array_map(fn($album) => [
+            'id' => $album['id'],
+            'title' => $album['title'],
+            'url' => $this->baseUrl . '/records/' . $album['id'],
+        ], $albums);
 
         $credits = $this->db->query(
-            'SELECT pc.role, pc.product_id, p.title FROM product_credits pc JOIN products p ON pc.product_id = p.id WHERE pc.artist_id = :id',
+            'SELECT rc.role, rc.record_id, p.title FROM record_credits rc JOIN records p ON rc.record_id = p.id WHERE rc.artist_id = :id',
             ['id' => $id]
         )->fetchAll();
 
-        // group credits by product since an artist can have multiple roles on one product
+        // group credits by album since an artist can have multiple roles on one album
         $groupedCredits = [];
         foreach ($credits as $credit) {
-            $productId = $credit['product_id'];
-            if (!isset($groupedCredits[$productId])) {
-                $groupedCredits[$productId] = [
-                    'product_id' => $productId,
+            $albumId = $credit['record_id'];
+            if (!isset($groupedCredits[$albumId])) {
+                $groupedCredits[$albumId] = [
+                    'record_id' => $albumId,
                     'title' => $credit['title'],
-                    'url' => $this->baseUrl . '/products/' . $productId,
+                    'url' => $this->baseUrl . '/records/' . $albumId,
                     'roles' => [],
                 ];
             }
-            $groupedCredits[$productId]['roles'][] = $credit['role'];
+            $groupedCredits[$albumId]['roles'][] = $credit['role'];
         }
         $artist['credits'] = array_values($groupedCredits);
 
@@ -91,7 +91,7 @@ class ArtistController
             return $response->with(error_response('name is required'), 400);
         }
 
-        $this->db->query('INSERT INTO artist (name) VALUES (:name)', ['name' => $body['name']]);
+        $this->db->query('INSERT INTO artists (name) VALUES (:name)', ['name' => $body['name']]);
         $id = (int)$this->db->lastInsertId();
 
         return $response->with(['message' => 'artist created', 'id' => $id], 201);
@@ -110,12 +110,12 @@ class ArtistController
             return $response->with(error_response('name is required'), 400);
         }
 
-        $artist = $this->db->query('SELECT id FROM artist WHERE id = :id', ['id' => $id])->fetch();
+        $artist = $this->db->query('SELECT id FROM artists WHERE id = :id', ['id' => $id])->fetch();
         if (!$artist) {
             return $response->with(error_response('artist not found'), 404);
         }
 
-        $this->db->query('UPDATE artist SET name = :name WHERE id = :id', ['name' => $body['name'], 'id' => $id]);
+        $this->db->query('UPDATE artists SET name = :name WHERE id = :id', ['name' => $body['name'], 'id' => $id]);
 
         return $response->with(['message' => 'artist updated']);
     }
@@ -127,12 +127,12 @@ class ArtistController
             return $response->with(error_response('invalid artist id'), 400);
         }
 
-        $artist = $this->db->query('SELECT id FROM artist WHERE id = :id', ['id' => $id])->fetch();
+        $artist = $this->db->query('SELECT id FROM artists WHERE id = :id', ['id' => $id])->fetch();
         if (!$artist) {
             return $response->with(error_response('artist not found'), 404);
         }
 
-        $this->db->query('DELETE FROM artist WHERE id = :id', ['id' => $id]);
+        $this->db->query('DELETE FROM artists WHERE id = :id', ['id' => $id]);
 
         return $response->with(['message' => 'artist deleted'], 200);
     }

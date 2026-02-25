@@ -12,7 +12,7 @@ use function App\paginate;
 use function App\validate_enum_fields;
 use function App\error_response;
 
-class ProductController
+class RecordController
 {
     private Database $db;
 
@@ -25,13 +25,13 @@ class ProductController
     {
         ['limit' => $limit, 'offset' => $offset] = paginate($request);
 
-        $total = (int)$this->db->query('SELECT COUNT(*) as count FROM products')->fetch()['count'];
+        $total = (int)$this->db->query('SELECT COUNT(*) as count FROM records')->fetch()['count'];
 
-        $products = $this->db
-            ->query('SELECT id FROM products LIMIT :limit OFFSET :offset', ['limit' => $limit, 'offset' => $offset])
+        $records = $this->db
+            ->query('SELECT id FROM records LIMIT :limit OFFSET :offset', ['limit' => $limit, 'offset' => $offset])
             ->fetchAll();
 
-        return $response->with(rest($products, 'products', $total, $limit, $offset));
+        return $response->with(rest($records, 'records', $total, $limit, $offset));
     }
 
     public function show(Request $request, Response $response, array $args = []): Response
@@ -39,33 +39,33 @@ class ProductController
         $id = filter_var($args['id'], FILTER_VALIDATE_INT);
 
         if ($id === false || $id <= 0) {
-            return $response->with(error_response('invalid product id'), 400);
+            return $response->with(error_response('invalid record id'), 400);
         }
 
         // shorthand for running relationship queries
         $rels = fn(string $sql) => $this->db->query($sql, ['id' => $id])->fetchAll();
 
-        $product = $this->db
+        $record = $this->db
             ->query(
                 'SELECT p.id, p.title, p.description, p.price, p.media_condition,
                  p.sleeve_condition, p.stock, p.format, p.release_date, c.name as country
-                 FROM products p LEFT JOIN country c ON p.country_id = c.id WHERE p.id = :id',
+                 FROM records p LEFT JOIN countries c ON p.country_id = c.id WHERE p.id = :id',
                 ['id' => $id]
             )
             ->fetch();
 
-        if (!$product) {
-            return $response->with(error_response('product not found'), 404);
+        if (!$record) {
+            return $response->with(error_response('record not found'), 404);
         }
 
-        $product['images'] = $this->db->related('images', 'product_id', $id, 'id, url, alt_text');
-        $product['artists'] = $rels('SELECT a.id, a.name FROM artist a JOIN product_artists pa ON a.id = pa.artist_id WHERE pa.product_id = :id');
-        $product['labels'] = $rels('SELECT l.id, l.name FROM label l JOIN product_labels pl ON l.id = pl.label_id WHERE pl.product_id = :id');
-        $product['genres'] = $rels('SELECT g.id, g.name FROM genre g JOIN product_genres pg ON g.id = pg.genre_id WHERE pg.product_id = :id');
-        $product['tracks'] = $rels('SELECT title, duration, position, side FROM tracks WHERE product_id = :id ORDER BY side, position');
-        $product['credits'] = $rels('SELECT a.name, pc.role FROM product_credits pc JOIN artist a ON pc.artist_id = a.id WHERE pc.product_id = :id');
+        $record['images'] = $this->db->related('images', 'record_id', $id, 'id, url, alt_text');
+        $record['artists'] = $rels('SELECT a.id, a.name FROM artists a JOIN record_artists ra ON a.id = ra.artist_id WHERE ra.record_id = :id');
+        $record['labels'] = $rels('SELECT l.id, l.name FROM labels l JOIN record_labels rl ON l.id = rl.label_id WHERE rl.record_id = :id');
+        $record['genres'] = $rels('SELECT g.id, g.name FROM genres g JOIN record_genres rg ON g.id = rg.genre_id WHERE rg.record_id = :id');
+        $record['tracks'] = $rels('SELECT title, duration, position, side FROM tracks WHERE record_id = :id ORDER BY side, position');
+        $record['credits'] = $rels('SELECT a.name, rc.role FROM record_credits rc JOIN artists a ON rc.artist_id = a.id WHERE rc.record_id = :id');
 
-        return $response->with($product, 200);
+        return $response->with($record, 200);
     }
 
     public function store(Request $request, Response $response): Response
@@ -80,7 +80,7 @@ class ProductController
             return $response->with(error_response($error), 400);
         }
 
-        $sql = 'INSERT INTO products (title, description, price, media_condition, sleeve_condition, stock, format, release_date, country_id) 
+        $sql = 'INSERT INTO records (title, description, price, media_condition, sleeve_condition, stock, format, release_date, country_id) 
                 VALUES (:title, :description, :price, :media_condition, :sleeve_condition, :stock, :format, :release_date, :country_id)';
 
         $params = [
@@ -98,14 +98,14 @@ class ProductController
         $this->db->query($sql, $params);
         $id = (int)$this->db->lastInsertId();
 
-        return $response->with(['message' => 'product created', 'id' => $id], 201);
+        return $response->with(['message' => 'record created', 'id' => $id], 201);
     }
 
     public function update(Request $request, Response $response, array $args = []): Response
     {
         $id = filter_var($args['id'], FILTER_VALIDATE_INT);
         if ($id === false || $id <= 0) {
-            return $response->with(error_response('invalid product id'), 400);
+            return $response->with(error_response('invalid record id'), 400);
         }
 
         $body = $request->getParsedBody();
@@ -118,12 +118,12 @@ class ProductController
             return $response->with(error_response($error), 400);
         }
 
-        $product = $this->db->query('SELECT id FROM products WHERE id = :id', ['id' => $id])->fetch();
-        if (!$product) {
-            return $response->with(error_response('product not found'), 404);
+        $record = $this->db->query('SELECT id FROM records WHERE id = :id', ['id' => $id])->fetch();
+        if (!$record) {
+            return $response->with(error_response('record not found'), 404);
         }
 
-        $sql = 'UPDATE products SET 
+        $sql = 'UPDATE records SET 
                 title = :title, 
                 description = :description, 
                 price = :price, 
@@ -150,14 +150,14 @@ class ProductController
 
         $this->db->query($sql, $params);
 
-        return $response->with(['message' => 'product updated']);
+        return $response->with(['message' => 'record updated']);
     }
 
     public function patch(Request $request, Response $response, array $args = []): Response
     {
         $id = filter_var($args['id'], FILTER_VALIDATE_INT);
         if ($id === false || $id <= 0) {
-            return $response->with(error_response('invalid product id'), 400);
+            return $response->with(error_response('invalid record id'), 400);
         }
 
         $body = $request->getParsedBody();
@@ -169,9 +169,9 @@ class ProductController
             return $response->with(error_response($error), 400);
         }
 
-        $product = $this->db->query('SELECT id FROM products WHERE id = :id', ['id' => $id])->fetch();
-        if (!$product) {
-            return $response->with(error_response('product not found'), 404);
+        $record = $this->db->query('SELECT id FROM records WHERE id = :id', ['id' => $id])->fetch();
+        if (!$record) {
+            return $response->with(error_response('record not found'), 404);
         }
 
         $allowedFields = [
@@ -193,26 +193,26 @@ class ProductController
             return $response->with(error_response('no valid fields provided'), 400);
         }
 
-        $sql = 'UPDATE products SET ' . implode(', ', $updates) . ' WHERE id = :id';
+        $sql = 'UPDATE records SET ' . implode(', ', $updates) . ' WHERE id = :id';
         $this->db->query($sql, $params);
 
-        return $response->with(['message' => 'product updated']);
+        return $response->with(['message' => 'record updated']);
     }
 
     public function destroy(Request $request, Response $response, array $args = []): Response
     {
         $id = filter_var($args['id'], FILTER_VALIDATE_INT);
         if ($id === false || $id <= 0) {
-            return $response->with(error_response('invalid product id'), 400);
+            return $response->with(error_response('invalid record id'), 400);
         }
 
-        $product = $this->db->query('SELECT id FROM products WHERE id = :id', ['id' => $id])->fetch();
-        if (!$product) {
-            return $response->with(error_response('product not found'), 404);
+        $record = $this->db->query('SELECT id FROM records WHERE id = :id', ['id' => $id])->fetch();
+        if (!$record) {
+            return $response->with(error_response('record not found'), 404);
         }
 
-        $this->db->query('DELETE FROM products WHERE id = :id', ['id' => $id]);
+        $this->db->query('DELETE FROM records WHERE id = :id', ['id' => $id]);
 
-        return $response->with(['message' => 'product deleted'], 200);
+        return $response->with(['message' => 'record deleted'], 200);
     }
 }
