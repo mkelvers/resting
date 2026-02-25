@@ -12,5 +12,5 @@ $controller = new ArtistController(
 
 $app->get('/artists', [$controller, 'index']);
 $app->get('/artists/{id}', [$controller, 'show']);
-$app->post('/artists', [$controller, 'store']);
-$app->delete('/artists/{id}', [$controller, 'destroy']);
+$app->post('/artists', [$controller, 'store'])->add([App\Authentication::class, 'basicAuth']);;
+$app->delete('/artists/{id}', [$controller, 'destroy'])->add([App\Authentication::class, 'basicAuth']);;
