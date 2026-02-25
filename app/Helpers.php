@@ -99,16 +99,8 @@ function paginate(Request $request): array
     ];
 }
 
-// wraps data in standard response format
-function response(mixed $data, int $status = 200): array
-{
-    return [
-        'data' => $data
-    ];
-}
-
 // wraps error in standard error format
-function error_response(string $message, int $status = 400): array
+function error_response(string $message): array
 {
     return [
         'error' => [

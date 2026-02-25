@@ -10,7 +10,6 @@ use Comet\Response;
 use function App\rest;
 use function App\paginate;
 use function App\validate_enum_fields;
-use function App\response;
 use function App\error_response;
 
 class ProductController
@@ -66,7 +65,7 @@ class ProductController
         $product['tracks'] = $rels('SELECT title, duration, position, side FROM tracks WHERE product_id = :id ORDER BY side, position');
         $product['credits'] = $rels('SELECT a.name, pc.role FROM product_credits pc JOIN artist a ON pc.artist_id = a.id WHERE pc.product_id = :id');
 
-        return $response->with(response($product));
+        return $response->with($product, 200);
     }
 
     public function store(Request $request, Response $response): Response
@@ -99,7 +98,7 @@ class ProductController
         $this->db->query($sql, $params);
         $id = (int)$this->db->lastInsertId();
 
-        return $response->with(response(['message' => 'product created', 'id' => $id], 201), 201);
+        return $response->with(['message' => 'product created', 'id' => $id], 201);
     }
 
     public function update(Request $request, Response $response, array $args = []): Response
@@ -151,7 +150,7 @@ class ProductController
 
         $this->db->query($sql, $params);
 
-        return $response->with(response(['message' => 'product updated']));
+        return $response->with(['message' => 'product updated']);
     }
 
     public function patch(Request $request, Response $response, array $args = []): Response
@@ -197,7 +196,7 @@ class ProductController
         $sql = 'UPDATE products SET ' . implode(', ', $updates) . ' WHERE id = :id';
         $this->db->query($sql, $params);
 
-        return $response->with(response(['message' => 'product updated']));
+        return $response->with(['message' => 'product updated']);
     }
 
     public function destroy(Request $request, Response $response, array $args = []): Response
@@ -214,6 +213,6 @@ class ProductController
 
         $this->db->query('DELETE FROM products WHERE id = :id', ['id' => $id]);
 
-        return $response->with(response(['message' => 'product deleted']));
+        return $response->with(['message' => 'product deleted'], 200);
     }
 }
