@@ -43,6 +43,7 @@ class ProductController
             return $response->with(error_response('invalid product id'), 400);
         }
 
+        // shorthand for running relationship queries
         $rels = fn(string $sql) => $this->db->query($sql, ['id' => $id])->fetchAll();
 
         $product = $this->db
@@ -179,9 +180,9 @@ class ProductController
             'sleeve_condition', 'stock', 'format', 'release_date', 'country_id'
         ];
 
+        // only update fields that were actually sent in the request
         $updates = [];
         $params = ['id' => $id];
-
         foreach ($allowedFields as $field) {
             if (array_key_exists($field, $body)) {
                 $updates[] = "$field = :$field";

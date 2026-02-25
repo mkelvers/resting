@@ -65,6 +65,7 @@ class ArtistController
             ['id' => $id]
         )->fetchAll();
 
+        // group credits by product since an artist can have multiple roles on one product
         $groupedCredits = [];
         foreach ($credits as $credit) {
             $productId = $credit['product_id'];

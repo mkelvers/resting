@@ -6,6 +6,7 @@ namespace App;
 
 use Comet\Request;
 
+// valid enum values for product fields
 const MEDIA_CONDITIONS = ['mint', 'near_mint', 'very_good_plus', 'very_good', 'good', 'fair', 'poor'];
 const SLEEVE_CONDITIONS = ['mint', 'near_mint', 'very_good_plus', 'very_good', 'good', 'fair', 'poor', 'generic'];
 const FORMATS = ['lp', 'vinyl', '12_maxi', '7_single', 'cd_album', 'cd_single'];
@@ -24,12 +25,7 @@ function validate_enum_fields(array $body): ?string
     return null;
 }
 
-/**
- * Middleware to strip trailing slashes from request URIs.
- * This helps to avoid issues with routing and ensures consistent URL handling.
- *
- * @return callable The middleware function that processes the request and response.
- */
+// removes trailing slashes from uris
 function strip_trailing_slash(): callable
 {
     return function ($request, $handler) {
@@ -43,28 +39,19 @@ function strip_trailing_slash(): callable
     };
 }
 
-/**
- * Transforms an array of items into a RESTful response format.
- * Each item is expected to have an 'id' field, which is used to generate a URL for the resource.
- * 
- * @param array $data The array of items to transform.
- * @param string $route The base route for the resources (e.g., 'posts').
- * @param array $extraFields Fields to include alongside id and url (e.g., ['name', 'title']).
- * @return array The transformed RESTful response.
- */
-function rest(array $data, string $route, ?int $count = null, ?int $limit = null, ?int $offset = null, array $extraFields = []): array
+// transforms items into rest response with pagination links
+function rest(array $data, string $route, ?int $count = null, ?int $limit = null, ?int $offset = null, array $extra = []): array
 {
-    // base url from environment, used to build resource urls
     $url = $_ENV['BASE_URL'];
 
-    // transforms each item into its id and url representation
-    $results = array_map(function (array $item) use ($url, $route, $extraFields): array {
+    $results = array_map(function (array $item) use ($url, $route, $extra): array {
         $id = $item['id'] ?? null;
         $result = [
             'id' => $id,
             'url' => $id ? "$url/$route/$id" : null,
         ];
-        foreach ($extraFields as $field) {
+        // add any extra fields requested (e.g. name, title)
+        foreach ($extra as $field) {
             if (array_key_exists($field, $item)) {
                 $result[$field] = $item[$field];
             }
@@ -76,11 +63,13 @@ function rest(array $data, string $route, ?int $count = null, ?int $limit = null
     $previous = null;
 
     if ($count !== null && $limit !== null && $offset !== null) {
+        // there are more pages
         if ($offset + $limit < $count) {
             $nextOffset = $offset + $limit;
             $next = "$url/$route?offset=$nextOffset&limit=$limit";
         }
         
+        // there are previous pages
         if ($offset > 0) {
             $prevOffset = max(0, $offset - $limit);
             $previous = "$url/$route?offset=$prevOffset&limit=$limit";
@@ -95,18 +84,12 @@ function rest(array $data, string $route, ?int $count = null, ?int $limit = null
     ];
 }
 
-/**
- * Extract pagination details from a request.
- *
- * @param \Comet\Request $request
- * @return array{limit: int, offset: int}
- */
+// extracts pagination params from request query string
 function paginate(Request $request): array
 {
     $params = $request->getQueryParams() ?? [];
     
-    // set default limit and offset values, however can be overriden by query parameters
-    // we also ensure that limit is at least 1 and offset is not negative
+    // ensure limit is at least 1 and offset is not negative
     $limit = isset($params['limit']) ? max(1, (int)$params['limit']) : 20;
     $offset = isset($params['offset']) ? max(0, (int)$params['offset']) : 0;
 
@@ -116,20 +99,20 @@ function paginate(Request $request): array
     ];
 }
 
+// wraps data in standard response format
 function response(mixed $data, int $status = 200): array
 {
     return [
-        'data' => $data,
-        'status' => $status,
+        'data' => $data
     ];
 }
 
+// wraps error in standard error format
 function error_response(string $message, int $status = 400): array
 {
     return [
         'error' => [
             'message' => $message,
         ],
-        'status' => $status,
     ];
 }
