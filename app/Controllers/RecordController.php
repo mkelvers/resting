@@ -175,8 +175,15 @@ class RecordController
         }
 
         $allowedFields = [
-            'title', 'description', 'price', 'media_condition',
-            'sleeve_condition', 'stock', 'format', 'release_date', 'country_id'
+            'title',
+            'description',
+            'price',
+            'media_condition',
+            'sleeve_condition',
+            'stock',
+            'format',
+            'release_date',
+            'country_id'
         ];
 
         // only update fields that were actually sent in the request

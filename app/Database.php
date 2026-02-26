@@ -37,7 +37,7 @@ class Database
 
     $config = [];
     foreach (['host', 'port', 'name', 'user', 'password'] as $key) {
-      $envKey = 'DB_'.strtoupper($key);
+      $envKey = 'DB_' . strtoupper($key);
       if (!isset($_ENV[$envKey])) {
         throw new \Exception("missing db environment variable: {$envKey}");
       }

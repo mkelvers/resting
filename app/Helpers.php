@@ -68,7 +68,7 @@ function rest(array $data, string $route, ?int $count = null, ?int $limit = null
             $nextOffset = $offset + $limit;
             $next = "$url/$route?offset=$nextOffset&limit=$limit";
         }
-        
+
         // there are previous pages
         if ($offset > 0) {
             $prevOffset = max(0, $offset - $limit);
@@ -88,7 +88,7 @@ function rest(array $data, string $route, ?int $count = null, ?int $limit = null
 function paginate(Request $request): array
 {
     $params = $request->getQueryParams() ?? [];
-    
+
     // ensure limit is at least 1 and offset is not negative
     $limit = isset($params['limit']) ? max(1, (int)$params['limit']) : 20;
     $offset = isset($params['offset']) ? max(0, (int)$params['offset']) : 0;

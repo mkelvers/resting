@@ -15,8 +15,8 @@ if (!isset($_ENV['DB_HOST'])) {
 }
 
 $app = new Comet\Comet([
-    'host' => '0.0.0.0',
-    'port' => $_ENV['PORT'] ?? 8080,
+  'host' => '0.0.0.0',
+  'port' => $_ENV['PORT'] ?? 8080,
 ]);
 
 $app->add(strip_trailing_slash());
