@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql:3306
--- Generation Time: Feb 25, 2026 at 04:47 PM
+-- Generation Time: Feb 26, 2026 at 03:38 PM
 -- Server version: 8.4.8
 -- PHP Version: 8.3.26
 
@@ -38,7 +38,7 @@ CREATE TABLE `artists` (
 
 INSERT INTO `artists` (`id`, `name`) VALUES
 (1, 'The Beatles'),
-(2, 'Pink Floyd'),
+(2, 'David Bowie'),
 (3, 'Led Zeppelin'),
 (4, 'Queen'),
 (5, 'The Rolling Stones'),
@@ -246,6 +246,18 @@ CREATE TABLE `images` (
   `alt_text` varchar(255) DEFAULT NULL,
   `record_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `images`
+--
+
+INSERT INTO `images` (`id`, `url`, `alt_text`, `record_id`) VALUES
+(1, 'https://i.discogs.com/M2yc5OJZPdVoDm2_UlRRXuDlDguamLLSdnbziNmZoQI/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI2MDc0/MjQtMTYzMDYwMTA4/Ny0xMTk5LmpwZWc.jpeg', 'Abbey Road, Primary, 1 of 6', 1),
+(2, 'https://i.discogs.com/Dmkx8oK2MyPudMetka17E3-2jI-OHrYXeISNB6r39IE/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI2MDc0/MjQtMTYzMDYwMTEw/NC00MzcwLmpwZWc.jpeg', 'Abbey Road, Primary, 2 of 6', 1),
+(3, 'https://i.discogs.com/dF1jrkSAiklJimxCm1F1WP77pwZ0jAq1ByQsU2-CAyI/rs:fit/g:sm/q:90/h:598/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI2MDc0/MjQtMTUyMzYxODI1/Ni00MzkyLmpwZWc.jpeg', 'Abbey Road, Primary, 3 of 6', 1),
+(4, 'https://i.discogs.com/AJBiSZPvvxe0u7jehUHMLCZsSyEaldOwIe13jF_GJ5k/rs:fit/g:sm/q:90/h:600/w:599/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI2MDc0/MjQtMTUyMzYxODI3/MS00MzQ0LmpwZWc.jpeg', 'Abbey Road, Primary, 4 of 6', 1),
+(5, 'https://i.discogs.com/qZbEq4T1TM3uR7ec5q_qz_DytH13cdzJ1f_Ze1k58f8/rs:fit/g:sm/q:90/h:553/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI2MDc0/MjQtMTU3OTgxNjE2/MC0yNzMxLmpwZWc.jpeg', 'Abbey Road, Primary, 5 of 6', 1),
+(6, 'https://i.discogs.com/in1T4NQtl2_gQVOhmc7Ce-u1z2ToibnWmY9qMD1OIYQ/rs:fit/g:sm/q:90/h:564/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTI2MDc0/MjQtMTU3OTgxNjE2/MC00NjQxLmpwZWc.jpeg', 'Abbey Road, Primary, 6 of 6', 1);
 
 -- --------------------------------------------------------
 
@@ -476,7 +488,6 @@ CREATE TABLE `record_credits` (
 INSERT INTO `record_credits` (`id`, `record_id`, `artist_id`, `role`) VALUES
 (103, 1, 1, 'Vocals, Guitar'),
 (104, 1, 1, 'Producer'),
-(105, 2, 2, 'Vocals, Guitar'),
 (106, 2, 8, 'Producer'),
 (107, 3, 6, 'Vocals'),
 (108, 3, 6, 'Dance'),
@@ -490,7 +501,6 @@ INSERT INTO `record_credits` (`id`, `record_id`, `artist_id`, `role`) VALUES
 (116, 7, 50, 'Vocals'),
 (117, 8, 3, 'Main Artist'),
 (118, 8, 49, 'Guitar'),
-(119, 9, 2, 'Vocals, Guitar'),
 (120, 9, 22, 'Guitar'),
 (121, 10, 41, 'Trumpet'),
 (122, 10, 42, 'Piano'),
@@ -530,7 +540,6 @@ INSERT INTO `record_credits` (`id`, `record_id`, `artist_id`, `role`) VALUES
 (156, 27, 47, 'Guitar'),
 (157, 28, 47, 'Vocals'),
 (158, 28, 48, 'Vocals'),
-(159, 29, 2, 'Vocals, Guitar'),
 (160, 29, 3, 'Bass'),
 (161, 30, 14, 'Vocals, Guitar'),
 (162, 30, 15, 'Guitar'),
@@ -544,7 +553,6 @@ INSERT INTO `record_credits` (`id`, `record_id`, `artist_id`, `role`) VALUES
 (170, 34, 8, 'Guitar'),
 (171, 35, 27, 'Vocals'),
 (172, 35, 11, 'Vocals'),
-(173, 36, 2, 'Vocals'),
 (174, 36, 1, 'Guitar'),
 (175, 37, 45, 'Vocals'),
 (176, 37, 43, 'Piano'),
@@ -573,7 +581,12 @@ INSERT INTO `record_credits` (`id`, `record_id`, `artist_id`, `role`) VALUES
 (199, 49, 28, 'Vocals'),
 (200, 49, 26, 'Vocals'),
 (201, 50, 29, 'Vocals'),
-(202, 50, 24, 'Vocals');
+(202, 50, 24, 'Vocals'),
+(203, 2, 2, 'Vocals, Guitar'),
+(204, 2, 2, 'Composer'),
+(205, 9, 2, 'Vocals, Guitar'),
+(206, 29, 2, 'Vocals, Guitar'),
+(207, 36, 2, 'Vocals');
 
 -- --------------------------------------------------------
 
@@ -1201,7 +1214,7 @@ ALTER TABLE `genres`
 -- AUTO_INCREMENT for table `images`
 --
 ALTER TABLE `images`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `labels`
@@ -1219,7 +1232,7 @@ ALTER TABLE `records`
 -- AUTO_INCREMENT for table `record_credits`
 --
 ALTER TABLE `record_credits`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=203;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=208;
 
 --
 -- AUTO_INCREMENT for table `tracks`
