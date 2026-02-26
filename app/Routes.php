@@ -22,13 +22,17 @@ class Routes
       return;
     }
 
-    // retrieves all php files in the routes directory and requires them
+    // retrieves all php files in the routes directory and subdirectories
     // requires means that the routes defined in those files will be registered
     // along with the app instance passed to this method
-    $files = glob($routesDir . '/*.php');
+    $files = new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($routesDir, \RecursiveDirectoryIterator::SKIP_DOTS)
+    );
 
     foreach ($files as $file) {
-      require_once $file;
+      if ($file->getExtension() === 'php') {
+        require_once $file->getPathname();
+      }
     }
 
     // catch-all route for any undefined routes, returns a 404 error
