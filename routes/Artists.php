@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Authentication;
 use App\Controllers\ArtistController;
 use App\Database;
 
@@ -12,5 +13,5 @@ $controller = new ArtistController(
 
 $app->get('/artists', [$controller, 'index']);
 $app->get('/artists/{id}', [$controller, 'show']);
-$app->post('/artists', [$controller, 'store'])->add([App\Authentication::class, 'basicAuth']);;
-$app->delete('/artists/{id}', [$controller, 'destroy'])->add([App\Authentication::class, 'basicAuth']);;
+$app->post('/artists', [$controller, 'store'])->add([Authentication::class, 'basicAuth']);;
+$app->delete('/artists/{id}', [$controller, 'destroy'])->add([Authentication::class, 'basicAuth']);;
