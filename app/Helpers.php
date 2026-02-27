@@ -22,6 +22,12 @@ function validate_enum_fields(array $body): ?string
     if (isset($body['format']) && !in_array($body['format'], FORMATS, true)) {
         return 'invalid format';
     }
+    if (isset($body['release_date']) && $body['release_date'] !== '') {
+        $date = \DateTime::createFromFormat('Y-m-d', $body['release_date']);
+        if (!$date || $date->format('Y-m-d') !== $body['release_date']) {
+            return 'invalid release_date - must be YYYY-MM-DD format';
+        }
+    }
     return null;
 }
 
