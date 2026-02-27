@@ -1,0 +1,837 @@
+openapi: 3.0.3
+info:
+  title: Resting API
+  description: A simple REST API for managing music records, artists, genres, labels, and countries.
+  version: 1.0.0
+  contact:
+    name: mikkel elvers
+servers:
+  - url: https://resting-api.mkelvers.tech
+    description: Production server
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Records
+    description: Vinyl record management
+  - name: Artists
+    description: Music artists
+  - name: Genres
+    description: Music genres
+  - name: Labels
+    description: Record labels
+  - name: Countries
+    description: Countries
+  - name: Images
+    description: Record images
+  - name: Tracks
+    description: Album tracks
+
+paths:
+  /records:
+    get:
+      tags:
+        - Records
+      summary: List all records
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: A paginated list of records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordsList'
+    post:
+      tags:
+        - Records
+      summary: Create a new record
+      security:
+        - BasicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCreate'
+      responses:
+        '201':
+          description: Record created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordCreated'
+        '400':
+          description: Validation error
+
+  /records/{id}:
+    get:
+      tags:
+        - Records
+      summary: Get a single record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Record details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordDetail'
+        '400':
+          description: Invalid ID
+        '404':
+          description: Record not found
+    put:
+      tags:
+        - Records
+      summary: Replace a record (full update)
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCreate'
+      responses:
+        '200':
+          description: Record updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Validation error
+        '404':
+          description: Record not found
+    patch:
+      tags:
+        - Records
+      summary: Partial update a record
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Record updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Validation error
+        '404':
+          description: Record not found
+    delete:
+      tags:
+        - Records
+      summary: Delete a record
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Record deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Invalid ID
+        '404':
+          description: Record not found
+
+  /artists:
+    get:
+      tags:
+        - Artists
+      summary: List all artists
+      responses:
+        '200':
+          description: List of artists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtistsList'
+    post:
+      tags:
+        - Artists
+      summary: Create a new artist
+      security:
+        - BasicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                bio:
+                  type: string
+                image:
+                  type: string
+      responses:
+        '201':
+          description: Artist created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtistCreated'
+
+  /artists/{id}:
+    get:
+      tags:
+        - Artists
+      summary: Get a single artist
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Artist details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtistDetail'
+    delete:
+      tags:
+        - Artists
+      summary: Delete an artist
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Artist deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /genres:
+    get:
+      tags:
+        - Genres
+      summary: List all genres
+      responses:
+        '200':
+          description: List of genres
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenresList'
+    post:
+      tags:
+        - Genres
+      summary: Create a new genre
+      security:
+        - BasicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Genre created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenreCreated'
+
+  /genres/{id}:
+    delete:
+      tags:
+        - Genres
+      summary: Delete a genre
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Genre deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /labels:
+    get:
+      tags:
+        - Labels
+      summary: List all labels
+      responses:
+        '200':
+          description: List of labels
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelsList'
+    post:
+      tags:
+        - Labels
+      summary: Create a new label
+      security:
+        - BasicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Label created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelCreated'
+
+  /labels/{id}:
+    delete:
+      tags:
+        - Labels
+      summary: Delete a label
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Label deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /countries:
+    get:
+      tags:
+        - Countries
+      summary: List all countries
+      responses:
+        '200':
+          description: List of countries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountriesList'
+    post:
+      tags:
+        - Countries
+      summary: Create a new country
+      security:
+        - BasicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Country created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryCreated'
+
+  /countries/{id}:
+    delete:
+      tags:
+        - Countries
+      summary: Delete a country
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Country deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /records/{id}/images:
+    get:
+      tags:
+        - Images
+      summary: Get images for a record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Image'
+    post:
+      tags:
+        - Images
+      summary: Add an image to a record
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                alt_text:
+                  type: string
+      responses:
+        '201':
+          description: Image added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageCreated'
+    delete:
+      tags:
+        - Images
+      summary: Delete an image
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: image_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Image deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /records/{id}/tracks:
+    get:
+      tags:
+        - Tracks
+      summary: Get tracks for a record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of tracks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Track'
+    post:
+      tags:
+        - Tracks
+      summary: Add a track to a record
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                duration:
+                  type: string
+                position:
+                  type: integer
+                side:
+                  type: string
+                  enum: [A, B]
+      responses:
+        '201':
+          description: Track added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackCreated'
+
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+
+    RecordsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    RecordCreate:
+      type: object
+      required:
+        - title
+        - price
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        media_condition:
+          type: string
+          enum: [Mint, Near Mint, Very Good Plus, Very Good, Good, Fair, Poor]
+        sleeve_condition:
+          type: string
+          enum: [Mint, Near Mint, Very Good Plus, Very Good, Good, Fair, Poor]
+        stock:
+          type: integer
+          default: 0
+        format:
+          type: string
+          enum: [LP, EP, Single, 7", 10", 12"]
+        release_date:
+          type: string
+          format: date
+        country_id:
+          type: integer
+
+    RecordCreated:
+      type: object
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+
+    RecordDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        media_condition:
+          type: string
+        sleeve_condition:
+          type: string
+        stock:
+          type: integer
+        format:
+          type: string
+        release_date:
+          type: string
+        country:
+          type: string
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+        artists:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+        labels:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+        genres:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
+        credits:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              role:
+                type: string
+
+    ArtistsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+
+    ArtistCreated:
+      type: object
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+
+    ArtistDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        bio:
+          type: string
+        image:
+          type: string
+
+    GenresList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+
+    GenreCreated:
+      type: object
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+
+    LabelsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+
+    LabelCreated:
+      type: object
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+
+    CountriesList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+
+    CountryCreated:
+      type: object
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+
+    Image:
+      type: object
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+        alt_text:
+          type: string
+
+    ImageCreated:
+      type: object
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+
+    Track:
+      type: object
+      properties:
+        title:
+          type: string
+        duration:
+          type: string
+        position:
+          type: integer
+        side:
+          type: string
+
+    TrackCreated:
+      type: object
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
