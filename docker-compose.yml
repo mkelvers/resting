@@ -1,4 +1,19 @@
 services:
+  app:
+    build: .
+    container_name: resting-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: resting
+      DB_USER: root
+      DB_PASSWORD: root
+
   mysql:
     image: mysql:8.4
     container_name: resting-mysql
