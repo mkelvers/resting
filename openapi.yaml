@@ -6,7 +6,10 @@ info:
 
     ## Authentication
 
-    Most read operations are public. Write operations (POST, PUT, PATCH, DELETE) require HTTP Basic Authentication.
+    Write operations (POST, PUT, PATCH, DELETE) require HTTP Basic Authentication.
+
+    **Username:** `admin`
+    **Password:** `secret`
 
     ## Pagination
 
@@ -32,6 +35,9 @@ servers:
     description: Production
   - url: http://localhost:8080
     description: Local development
+
+security:
+  - BasicAuth: []
 
 tags:
   - name: Records

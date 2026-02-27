@@ -16,11 +16,20 @@ $app->get('/docs', function (Request $request, Response $response) {
     <title>Resting API Docs</title>
   </head>
   <body>
-    <div id="app"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-    <script>
-      Scalar.createApiReference('#app', { url: '/openapi.yaml' })
-    </script>
+    <rapi-doc spec-url="/openapi.yaml" 
+              render-style="focused" 
+              theme="dark"
+              show-header="false"
+              show-info="true"
+              allow-server-selection="false"
+              allow-authentication="true"
+              allow-try="true"
+              primary-color="#6366f1"> 
+      <div slot="nav-logo" style="display:flex;align-items:center;padding:10px">
+        <span style="color:white;font-weight:bold;font-size:1.2em">Resting API</span>
+      </div>
+    </rapi-doc>
+    <script src="https://cdn.jsdelivr.net/npm/rapidoc/dist/rapidoc-min.js"></script>
   </body>
 </html>
 HTML;
