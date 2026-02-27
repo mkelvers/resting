@@ -9,7 +9,7 @@ $app->get('/', function (Request $request, Response $response) {
   return $response->with([
     'message' => 'hello world',
     'version' => '1.0.0',
-    'doc' => $this->baseUrl . '/docs'
+    'doc' => $_ENV['BASE_URL'] . '/docs',
   ], 200);
 });
 
