@@ -123,6 +123,13 @@ class RecordController
             return $response->with(error_response('record not found'), 404);
         }
 
+        if (isset($body['country_id']) && $body['country_id'] !== null) {
+            $country = $this->db->query('SELECT id FROM countries WHERE id = :id', ['id' => $body['country_id']])->fetch();
+            if (!$country) {
+                return $response->with(error_response('invalid country_id - country not found'), 400);
+            }
+        }
+
         $sql = 'UPDATE records SET 
                 title = :title, 
                 description = :description, 
@@ -172,6 +179,13 @@ class RecordController
         $record = $this->db->query('SELECT id FROM records WHERE id = :id', ['id' => $id])->fetch();
         if (!$record) {
             return $response->with(error_response('record not found'), 404);
+        }
+
+        if (isset($body['country_id']) && $body['country_id'] !== null) {
+            $country = $this->db->query('SELECT id FROM countries WHERE id = :id', ['id' => $body['country_id']])->fetch();
+            if (!$country) {
+                return $response->with(error_response('invalid country_id - country not found'), 400);
+            }
         }
 
         $allowedFields = [
