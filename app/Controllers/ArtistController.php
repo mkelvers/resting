@@ -134,6 +134,6 @@ class ArtistController
 
         $this->db->query('DELETE FROM artists WHERE id = :id', ['id' => $id]);
 
-        return $response->with(['message' => 'artist deleted'], 200);
+        return $response->with(null, 204);
     }
 }

@@ -220,6 +220,6 @@ class RecordController
 
         $this->db->query('DELETE FROM records WHERE id = :id', ['id' => $id]);
 
-        return $response->with(['message' => 'record deleted'], 200);
+        return $response->with(null, 204);
     }
 }
