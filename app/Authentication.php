@@ -23,11 +23,10 @@ class Authentication
   {
     self::init();
 
-    $fail = fn(string $msg, int $code, array $headers = []) => (
-      new Response()
-      ->with($msg, $code)
-      ->withHeaders($headers)
-    );
+    $fail = function (string $msg, int $code, array $headers = []): Response {
+      $response = new Response();
+      return $response->with($msg, $code)->withHeaders($headers);
+    };
 
     if (self::$username === null || self::$password === null) {
       return $fail('basic auth not configured', 500);
